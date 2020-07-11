@@ -1,16 +1,19 @@
+import random
+
+
 class Dynamic_linear_hash_table:
     def __init__(self, count):
         self.name = None
         self.count = count
         self.initCapacity = count
+        self.currCapacity = count
         self.array = [None]*count
         self.valuearray = []
-        self.maxLoadFactor = 0.75
 
 # Accessors
 
     def size(self):
-        return self.count
+        return len((self.array))
 
     def empty(self):
         if (self.count == 0):
@@ -27,7 +30,7 @@ class Dynamic_linear_hash_table:
         return False
 
     def load_factor(self):
-        currcapacity = self.capacity()
+        currcapacity = self.currCapacity
         capacity = self.size()
         return ((capacity-currcapacity)/capacity)
 
@@ -37,11 +40,19 @@ class Dynamic_linear_hash_table:
 
     def insert(self, val):
         self.valuearray.append(val)
+        self.currCapacity -= 1
+        lf = self.load_factor()
+        if (lf > 0.75):
+            print("well above")
+            self.doubleSize()
         H = self.Cuckoo(val)
         if(self.array[H] != None):
             H = self.Probe(H)
 
         self.array[H] = val
+
+    def doubleSize(self):
+        print()
 
     def remove(self, val):
         print()
@@ -75,9 +86,12 @@ class Dynamic_linear_hash_table:
 def main():
     print()
     test = Dynamic_linear_hash_table(16)
-    test.insert(100)
-    test.insert(100)
-    print(test.array)
+    a = []
+    for i in range(0, 16):
+        a.append(random.randint(1, 100))
+    print(a)
+    for element in a:
+        test.insert(element)
 
 
 main()
