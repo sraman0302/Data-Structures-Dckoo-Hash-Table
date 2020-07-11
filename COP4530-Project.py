@@ -1,9 +1,11 @@
 class Dynamic_linear_hash_table:
-    def __init__(self, count, currcapp, icapp):
+    def __init__(self, count):
         self.name = None
         self.count = count
-        self.currCapacity = currcapp
-        self.initCapacity = icapp
+        self.initCapacity = count
+        self.array = [None]*count
+        self.valuearray = []
+        self.maxLoadFactor = 0.75
 
 # Accessors
 
@@ -16,33 +18,66 @@ class Dynamic_linear_hash_table:
         else:
             return True
 
-    def capacity(self, array):
-        return (self.count-array.count(None))
+    def capacity(self):
+        return (self.array.count(None))
 
-    def member(self, val, array):
-        if val in array:
+    def member(self, val):
+        if val in self.array:
             return True
         return False
 
-    def load_factor(self, array):
-        print()
+    def load_factor(self):
+        currcapacity = self.capacity()
+        capacity = self.size()
+        return ((capacity-currcapacity)/capacity)
 
-    def bin(self, array):
-        print()
+    def bin(self, index):
+        return (self.array[index])
 # Mutators
 
-    def insert(self):
-        print()
+    def insert(self, val):
+        self.valuearray.append(val)
+        H = self.Cuckoo(val)
+        if(self.array[H] != None):
+            H = self.Probe(H)
 
-    def remove(self):
+        self.array[H] = val
+
+    def remove(self, val):
         print()
 
     def clear(self):
         print()
 
+    def Cuckoo(self, val):
+        prod = val*53267
+        if(prod < 0):
+            prod = (prod+(2**31))
+        bit = bin(prod)
+        bit = bit[:-5]
+        prod = int(bit, 2)
+        size = self.capacity()
+        H = prod % size
+        return(H)
+
+    def Probe(self, h):
+        while(self.array[h] != None):
+            h = h+1
+        return h
+
+
+# Destructor
+
+#    def __del__(self):
+ #       print("Deleted")
+
 
 def main():
     print()
+    test = Dynamic_linear_hash_table(16)
+    test.insert(100)
+    test.insert(100)
+    print(test.array)
 
 
 main()
