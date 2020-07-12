@@ -8,7 +8,6 @@ class Dynamic_linear_hash_table:
         self.initCapacity = count
         self.currCapacity = count
         self.array = [None]*count
-        self.valuearray = []
 
 # Accessors
 
@@ -24,9 +23,12 @@ class Dynamic_linear_hash_table:
     def capacity(self, array):
         return (array.count(None))
 
-    def member(self, val):
-        if val in self.array:
-            return True
+    def member(self, val, array):
+        size = len(array)
+        H = self.value(val, array)
+        while(array[H] != None):
+            if(array[H] == val):
+                return True
         return False
 
     def load_factor(self, array):
@@ -40,8 +42,10 @@ class Dynamic_linear_hash_table:
 # Mutators
 
     def insert(self, val):
-        update = self.array
-        self.array = self.Cuckoo(update, val)
+        # if(not self.member(val)):
+        self.array = self.Cuckoo(self.array, val)
+        # else:
+     #   print("Value already present")
 
     def doubleSize(self, array):
         newArray = [None]*2*(len(array))
@@ -61,25 +65,31 @@ class Dynamic_linear_hash_table:
     def clear(self):
         print()
 
-    def value(self, val):
+    def value(self, val, size):
         newVal = val*53267
         if(newVal <= 0):
             newVal = (newVal+(2**31))
         bit = bin(newVal)
         bit = bit[:-5]
-        newVal = int(bit, 2)
-        return (newVal)
+
+        H = int(bit, 2) % size
+
+        return (H)
 
     def Cuckoo(self, array, val):
-        newVal = self.value(val)
         size = self.capacity(array)
-        H = newVal % size
+        H = self.value(val, size)
         lf = self.load_factor(array)
         if (lf > 0.75):
             array = self.doubleSize(array)
-        while(array[H] != None):
+        i = 0
+        while(array[(H+i) % size] != None and i < size):
             H = H+1
+            if(H == len(array)-1):
+                H = 0
+            i += 1
         array[H] = val
+        print(H, val)
         return(array)
 # Destructor
 
@@ -89,13 +99,19 @@ class Dynamic_linear_hash_table:
 
 def main():
     print()
-    test = Dynamic_linear_hash_table(16)
+    test = Dynamic_linear_hash_table(2**4)
+    """
     a = []
     for i in range(0, 16):
         a.append(random.randint(1, 100))
     print(a)
     for element in a:
         test.insert(element)
+    """
+    test.insert(1)
+    test.insert(53)
+    test.insert(93)
+    test.insert(100)
 
     print((test.array))
 
