@@ -12,8 +12,8 @@ class Dynamic_linear_hash_table:
 
 # Accessors
 
-    def size(self):
-        return len((self.array))
+    def size(self, array):
+        return len(array)
 
     def empty(self):
         if (self.count == 0):
@@ -21,38 +21,39 @@ class Dynamic_linear_hash_table:
         else:
             return True
 
-    def capacity(self):
-        return (self.array.count(None))
+    def capacity(self, array):
+        return (array.count(None))
 
     def member(self, val):
         if val in self.array:
             return True
         return False
 
-    def load_factor(self):
-        currcapacity = self.currCapacity
-        capacity = self.size()
-        return ((capacity-currcapacity)/capacity)
+    def load_factor(self, array):
+        currcapacity = self.capacity(array)
+        capacity = self.size(array)
+        lf = ((capacity-currcapacity)/capacity)
+        return lf
 
     def bin(self, index):
         return (self.array[index])
 # Mutators
 
     def insert(self, val):
-        self.valuearray.append(val)
-        self.currCapacity -= 1
-        lf = self.load_factor()
-        if (lf > 0.75):
-            print("well above")
-            self.doubleSize()
-        H = self.Cuckoo(val)
-        if(self.array[H] != None):
-            H = self.Probe(H)
+        update = self.array
+        self.array = self.Cuckoo(update, val)
 
-        self.array[H] = val
-
-    def doubleSize(self):
-        print()
+    def doubleSize(self, array):
+        newArray = [None]*2*(len(array))
+        for element in array:
+            if (element != None):
+                val = self.value(element)
+                size = self.size(newArray)
+                H = val % size
+                while(newArray[H] != None):
+                    H = H+1
+                newArray[H] = element
+        return(newArray)
 
     def remove(self, val):
         print()
@@ -60,23 +61,26 @@ class Dynamic_linear_hash_table:
     def clear(self):
         print()
 
-    def Cuckoo(self, val):
-        prod = val*53267
-        if(prod < 0):
-            prod = (prod+(2**31))
-        bit = bin(prod)
+    def value(self, val):
+        newVal = val*53267
+        if(newVal <= 0):
+            newVal = (newVal+(2**31))
+        bit = bin(newVal)
         bit = bit[:-5]
-        prod = int(bit, 2)
-        size = self.capacity()
-        H = prod % size
-        return(H)
+        newVal = int(bit, 2)
+        return (newVal)
 
-    def Probe(self, h):
-        while(self.array[h] != None):
-            h = h+1
-        return h
-
-
+    def Cuckoo(self, array, val):
+        newVal = self.value(val)
+        size = self.capacity(array)
+        H = newVal % size
+        lf = self.load_factor(array)
+        if (lf > 0.75):
+            array = self.doubleSize(array)
+        while(array[H] != None):
+            H = H+1
+        array[H] = val
+        return(array)
 # Destructor
 
 #    def __del__(self):
@@ -92,6 +96,8 @@ def main():
     print(a)
     for element in a:
         test.insert(element)
+
+    print((test.array))
 
 
 main()
