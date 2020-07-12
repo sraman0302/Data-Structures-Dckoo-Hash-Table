@@ -21,20 +21,21 @@ class Dynamic_linear_hash_table:
             return True
 
     def capacity(self, array):
-        return (array.count(None))
+        return (array.count(None)+array.count("K.A."))
 
     def member(self, val, array):
         size = len(array)
-        H = self.value(val, array)
-        while(array[H] != None):
-            if(array[H] == val):
-                return True
-        return False
+        H = self.value(val, size)
+        i = 0
+        while(array[(H+i) % size] != None and i < size):
+            if(array[(H+i) % size] == val):
+                return ((H+i) % size)
+            i += 1
+        return None
 
-    def load_factor(self, array):
+    def load_factor(self, array, size):
         currcapacity = self.capacity(array)
-        capacity = self.size(array)
-        lf = ((capacity-currcapacity)/capacity)
+        lf = ((size-currcapacity)/size)
         return lf
 
     def bin(self, index):
@@ -42,28 +43,46 @@ class Dynamic_linear_hash_table:
 # Mutators
 
     def insert(self, val):
-        # if(not self.member(val)):
-        self.array = self.Cuckoo(self.array, val)
-        # else:
-     #   print("Value already present")
+        pos = self.member(val, self.array)
+        if(pos == None):
+            self.array = self.Cuckoo(self.array, val)
+        else:
+            print("Value {} already present at position {} ".format(val, pos+1))
 
-    def doubleSize(self, array):
-        newArray = [None]*2*(len(array))
+    def changeSize(self, array, size):
+
+        newArray = [None]*(size)
+
         for element in array:
-            if (element != None):
-                val = self.value(element)
-                size = self.size(newArray)
-                H = val % size
-                while(newArray[H] != None):
-                    H = H+1
+            if ((element != None) and (element != "K.A")):
+                H = self.value(element, size)
+                i = 0
+                while(newArray[(H+i) % size] != None):
+                    i += 1
                 newArray[H] = element
+            else:
+                continue
         return(newArray)
 
     def remove(self, val):
-        print()
+        index = self.member(val, self.array)
+        array = self.array
+        size = len(array)
+        if(index == None):
+            print("Value not Present")
+            return False
+
+        else:
+            array[index] = "K.A."
+            lf = round(self.load_factor(array, size), 2)
+            if (lf < 0.25):
+                array = self.changeSize(array, size/2)
+            self.array = array
+            return True
 
     def clear(self):
-        print()
+        self.array = []*self.count
+        return(self.array)
 
     def value(self, val, size):
         newVal = val*53267
@@ -71,25 +90,23 @@ class Dynamic_linear_hash_table:
             newVal = (newVal+(2**31))
         bit = bin(newVal)
         bit = bit[:-5]
+        newVal = int(bit, 2)
 
-        H = int(bit, 2) % size
+        H = newVal % size
 
         return (H)
 
     def Cuckoo(self, array, val):
-        size = self.capacity(array)
+        size = self.size(array)
         H = self.value(val, size)
-        lf = self.load_factor(array)
+        lf = round(self.load_factor(array, size), 2)
         if (lf > 0.75):
-            array = self.doubleSize(array)
+            array = self.changeSize(array, size*2)
         i = 0
-        while(array[(H+i) % size] != None and i < size):
-            H = H+1
-            if(H == len(array)-1):
-                H = 0
+        while(((array[(H+i) % size] != None) and (array[(H+i) % size] != "K.A."))and i < size):
             i += 1
-        array[H] = val
-        print(H, val)
+        array[(H+i) % size] = val
+
         return(array)
 # Destructor
 
@@ -99,21 +116,23 @@ class Dynamic_linear_hash_table:
 
 def main():
     print()
-    test = Dynamic_linear_hash_table(2**4)
-    """
+    test = Dynamic_linear_hash_table(16)
+
     a = []
-    for i in range(0, 16):
+    for i in range(0, 15):
         a.append(random.randint(1, 100))
-    print(a)
     for element in a:
         test.insert(element)
+
     """
     test.insert(1)
     test.insert(53)
     test.insert(93)
     test.insert(100)
-
-    print((test.array))
+    test.remove(100)
+    test.insert(100)
+    """
+    print(len(test.array))
 
 
 main()
